@@ -7,32 +7,38 @@ from typing import List, Union, Set, Dict
 inf = float("inf")
 
 
-class DisAssemblyAlgo:
+def print_matrix(mx):
+    for row in mx:
+        print(row)
+    print()
 
+
+class DisAssemblyAlgo:
     def __init__(self, v, followers, paths) -> None:
 
-        self.V: Set[str] = v
+        self.v: Set[str] = v
         self.followers: List[List[Union[str, int]]] = followers
         self.paths: List[List[Union[int, float]]] = paths
 
+        # Посещенные вершины
         self.visited: deque = deque()
 
         # Смежные вершины
         self.s: Dict[int, List[int]] = {}
 
-    def find_top_least(self) -> int:
+    def find_top_least(self) -> Union[int, float]:
         """ Находит вершину наименьшей степени """
 
-        min_node = inf
-        min_count = inf
+        min_node: Union[int, float] = inf
+        min_count: Union[int, float] = inf
 
         for node in self.followers:
 
-            n = str(self.followers.index(node) + 1)
-            if n not in self.V:
+            n: str = str(self.followers.index(node) + 1)
+            if n not in self.v:
                 continue
 
-            relations_count = len([
+            relations_count: int = len([
                 follower for follower in node
                 if follower != 0
             ])
@@ -46,24 +52,24 @@ class DisAssemblyAlgo:
     def find_related_nodes(self, in_node: int):
         """ Находит смежные для вершины in_node вершины"""
 
-        if len(self.V) == 2:
-            return list(self.V)
+        if len(self.v) == 2:
+            return list(self.v)
 
         return (
             node for node in self.followers[in_node]
-            if node != 0 and node in self.V
+            if node != 0 and node in self.v
         )
 
     def disassembly(self) -> None:
         """ Разборка графа """
 
-        while len(self.V) > 2:
+        while len(self.v) > 2:
             top_least_node = self.find_top_least()
             self.visited.appendleft(top_least_node)
 
-            self.V ^= {str(top_least_node + 1)}
+            self.v ^= {str(top_least_node + 1)}
             print(f"Удаляем вершину {top_least_node + 1}")
-            print("V:", sorted(self.V))
+            print("V:", sorted(self.v))
 
             related_nodes = list(
                 map(
@@ -91,8 +97,8 @@ class DisAssemblyAlgo:
                 else:
                     print("Ничего не меняем")
 
-            # print_matrix(followers)
-            # print_matrix(paths)
+            print_matrix(self.followers)
+            print_matrix(self.paths)
 
     def assembly(self) -> None:
         """ Сборка графа """
@@ -103,7 +109,7 @@ class DisAssemblyAlgo:
             print(f"Смежные с ней: {self.s[new_node]}")
 
             # Идем по всем доступным вершинам
-            for node in map(lambda x: int(x) - 1, self.V):
+            for node in map(lambda x: int(x) - 1, self.v):
                 old_distance = self.paths[new_node][node]
 
                 print(f"{new_node + 1} <-> {node + 1}: {old_distance}")
@@ -134,10 +140,10 @@ class DisAssemblyAlgo:
                     self.followers[node][new_node] = str(min_node_2 + 1)
 
             print()
-            # print_matrix(followers)
-            # print_matrix(paths)
+            print_matrix(self.followers)
+            print_matrix(self.paths)
 
-            self.V.add(str(new_node + 1))
+            self.v.add(str(new_node + 1))
 
     def get_lower_path(self, _from: str, _to: str) -> List[str]:
         """ Находит кратчайший путь между вершинами _from и _to """
