@@ -8,27 +8,27 @@ inf = float("inf")
 visited = deque()
 s = dict()
 
-V = {"1", "2", "3", "4", "5", "6"}
-
-# Матрица последователей - P
-followers = [
-    [0, "2", "3", "4", 0, "6"],
-    ["1", 0, "3", "4", 0, 0],
-    ["1", "2", 0, "4", 0, "6"],
-    ["1", "2", "3", 0, "5", 0],
-    [0, 0, 0, "4", 0, "6"],
-    ["1", 0, "3", 0, "5", 0]
-]
-
-# Матрица кратчайших расстояний - M
-paths = [
-    [0, 7, 9, 21, inf, 2],
-    [7, 0, 10, 15, inf, inf],
-    [9, 10, 0, 11, inf, 14],
-    [21, 15, 11, 0, 6, inf],
-    [inf, inf, inf, 6, 0, 9],
-    [2, inf, 14, inf, 9, 0]
-]
+# V = {"1", "2", "3", "4", "5", "6"}
+#
+# # Матрица последователей - P
+# followers = [
+#     [0, "2", "3", "4", 0, "6"],
+#     ["1", 0, "3", "4", 0, 0],
+#     ["1", "2", 0, "4", 0, "6"],
+#     ["1", "2", "3", 0, "5", 0],
+#     [0, 0, 0, "4", 0, "6"],
+#     ["1", 0, "3", 0, "5", 0]
+# ]
+#
+# # Матрица кратчайших расстояний - M
+# paths = [
+#     [0, 7, 9, 21, inf, 2],
+#     [7, 0, 10, 15, inf, inf],
+#     [9, 10, 0, 11, inf, 14],
+#     [21, 15, 11, 0, 6, inf],
+#     [inf, inf, inf, 6, 0, 9],
+#     [2, inf, 14, inf, 9, 0]
+# ]
 
 # V = {"1", "2", "3", "4"}
 # followers = [
@@ -45,6 +45,23 @@ paths = [
 #     [inf, 8, 4, 0]
 # ]
 
+V = {"1", "2", "3", "4", "5"}
+followers = [
+    [0, "2", 0, "4", "5"],
+    ["1", 0, "3", 0, 0],
+    [0, "2", 0, "4", "5"],
+    ["1", 0, "3", 0, 0],
+    ["1", 0, "3", 0, 0]
+]
+
+paths = [
+    [  0,   3, inf,  10,   2],
+    [  3,   0,   4, inf, inf],
+    [inf,   4,   0,   2, 3],
+    [ 10, inf,   2, 0, inf],
+    [  2, inf,   3, inf, 0]
+]
+
 
 def print_matrix(mx):
     for row in mx:
@@ -56,19 +73,23 @@ def find_top_least():
     min_node = inf
     min_count = inf
 
-    for node in followers:
+    for i in range(len(followers)):
+        n = str(i + 1)
 
-        n = str(followers.index(node) + 1)
         if n not in V:
             continue
 
-        relations_count = len([
-            follower for follower in node
-            if follower != 0
-        ])
+        relations_count = 0
+        for j in range(len(followers[i])):
+            if j not in visited and followers[i][j] != 0:
+                relations_count += 1
+
+        print(
+            f"Количество смежных с {i + 1} ({followers[i]}) = {relations_count}"
+        )
 
         if relations_count < min_count:
-            min_node = followers.index(node)
+            min_node = i
             min_count = relations_count
 
     return min_node

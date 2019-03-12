@@ -29,22 +29,26 @@ class DisAssemblyAlgo:
     def find_top_least(self) -> Union[int, float]:
         """ Находит вершину наименьшей степени """
 
-        min_node: Union[int, float] = inf
-        min_count: Union[int, float] = inf
+        min_node = inf
+        min_count = inf
 
-        for node in self.followers:
+        for i in range(len(self.followers)):
+            n = str(i + 1)
 
-            n: str = str(self.followers.index(node) + 1)
             if n not in self.v:
                 continue
 
-            relations_count: int = len([
-                follower for follower in node
-                if follower != 0
-            ])
+            relations_count = 0
+            for j in range(len(self.followers[i])):
+                if j not in self.visited and self.followers[i][j] != 0:
+                    relations_count += 1
+
+            print(
+                f"Количество смежных с {i + 1} ({self.followers[i]}) = {relations_count}"
+            )
 
             if relations_count < min_count:
-                min_node = self.followers.index(node)
+                min_node = i
                 min_count = relations_count
 
         return min_node
