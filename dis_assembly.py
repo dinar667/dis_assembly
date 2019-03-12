@@ -2,205 +2,173 @@
 
 from collections import deque
 from itertools import combinations
+from typing import List, Union, Set, Dict
 
 inf = float("inf")
 
-visited = deque()
-s = dict()
 
-V = {"1", "2", "3", "4", "5", "6"}
+class DisAssemblyAlgo:
 
-# Матрица последователей - P
-followers = [
-    [0, "2", "3", "4", 0, "6"],
-    ["1", 0, "3", "4", 0, 0],
-    ["1", "2", 0, "4", 0, "6"],
-    ["1", "2", "3", 0, "5", 0],
-    [0, 0, 0, "4", 0, "6"],
-    ["1", 0, "3", 0, "5", 0]
-]
+    def __init__(self, v, followers, paths) -> None:
 
-# Матрица кратчайших расстояний - M
-paths = [
-    [0, 7, 9, 21, inf, 2],
-    [7, 0, 10, 15, inf, inf],
-    [9, 10, 0, 11, inf, 14],
-    [21, 15, 11, 0, 6, inf],
-    [inf, inf, inf, 6, 0, 9],
-    [2, inf, 14, inf, 9, 0]
-]
+        self.V: Set[str] = v
+        self.followers: List[List[Union[str, int]]] = followers
+        self.paths: List[List[Union[int, float]]] = paths
 
-# V = {"1", "2", "3", "4"}
-# followers = [
-#     [0, "2", "3", 0],
-#     ["1", 0, "3", "4"],
-#     ["1", "2", 0, "4"],
-#     [0, "2", "3", 0]
-# ]
-#
-# paths = [
-#     [0, 2, 2, inf],
-#     [2, 0, 3, 8],
-#     [2, 3, 0, 4],
-#     [inf, 8, 4, 0]
-# ]
+        self.visited: deque = deque()
 
+        # Смежные вершины
+        self.s: Dict[int, List[int]] = {}
 
-def print_matrix(mx):
-    for row in mx:
-        print(row)
-    print()
+    def find_top_least(self) -> int:
+        """ Находит вершину наименьшей степени """
 
+        min_node = inf
+        min_count = inf
 
-def find_top_least():
-    min_node = inf
-    min_count = inf
+        for node in self.followers:
 
-    for node in followers:
-
-        n = str(followers.index(node) + 1)
-        if n not in V:
-            continue
-
-        relations_count = len([
-            follower for follower in node
-            if follower != 0
-        ])
-
-        if relations_count < min_count:
-            min_node = followers.index(node)
-            min_count = relations_count
-
-    return min_node
-
-
-def find_related_nodes(in_node):
-    if len(V) == 2:
-        return list(V)
-
-    return (
-        node for node in followers[in_node]
-        if node != 0 and node in V
-    )
-
-
-# ---- РАЗБОРКА ГРАФА ----
-
-while len(V) > 2:
-    top_least_node = find_top_least()
-    visited.appendleft(top_least_node)
-
-    V ^= {str(top_least_node + 1)}
-    print(f"Удаляем вершину {top_least_node + 1}")
-    print("V:", sorted(V))
-
-    related_nodes = list(
-        map(lambda x: int(x) - 1, find_related_nodes(top_least_node))
-    )
-    s[top_least_node] = related_nodes
-
-    pairs = combinations(related_nodes, r=2)
-    for i1, i2 in pairs:
-        distance = paths[i1][top_least_node] + paths[i2][top_least_node]
-        print(f"{i1 + 1} <-> {i2 + 1} = {distance}")
-
-        # Если пути не существует
-        # Или старый путь длиннее нового
-        if paths[i1][i2] == inf or paths[i1][i2] > distance:
-            print("Заменяем")
-            followers[i1][i2] = str(top_least_node + 1)
-            followers[i2][i1] = str(top_least_node + 1)
-
-            paths[i1][i2] = distance
-            paths[i2][i1] = distance
-        else:
-            print("Ничего не меняем")
-
-    print_matrix(followers)
-    print_matrix(paths)
-
-print("Разборка завершена")
-print("----")
-print()
-
-# ---- СБОРКА ГРАФА ----
-print("----")
-print("Сборка")
-print()
-
-while visited:
-    new_node = visited.popleft()
-    print(f"Добавляем вершину: {new_node + 1}")
-    print(f"Смежные с ней: {s[new_node]}")
-
-    # Идем по всем доступным вершинам
-    for node in map(lambda x: int(x) - 1, V):
-        old_distance = paths[new_node][node]
-
-        print(f"{new_node + 1} <-> {node + 1}: {old_distance}")
-
-        # А вот тут уже идем по смежным
-        min_dist_2 = inf
-        min_node_2 = None
-        for related in s[new_node]:
-            if related == node:
+            n = str(self.followers.index(node) + 1)
+            if n not in self.V:
                 continue
 
-            distance_2 = paths[new_node][related] + paths[related][node]
-            print(f"({new_node + 1} <-> {related + 1}) + "
-                  f"({related + 1} <-> {node + 1}): {distance_2}")
+            relations_count = len([
+                follower for follower in node
+                if follower != 0
+            ])
 
-            if distance_2 < min_dist_2:
-                min_dist_2 = distance_2
-                min_node_2 = related
+            if relations_count < min_count:
+                min_node = self.followers.index(node)
+                min_count = relations_count
 
-        if min_dist_2 < old_distance:
-            print(f"Меняем на {min_dist_2} с вершиной {min_node_2 + 1}")
-            paths[new_node][node] = min_dist_2
-            paths[node][new_node] = min_dist_2
+        return min_node
 
-            followers[new_node][node] = str(min_node_2 + 1)
-            followers[node][new_node] = str(min_node_2 + 1)
+    def find_related_nodes(self, in_node: int):
+        """ Находит смежные для вершины in_node вершины"""
 
-    print()
-    print_matrix(followers)
-    print_matrix(paths)
+        if len(self.V) == 2:
+            return list(self.V)
 
-    V.add(str(new_node + 1))
+        return (
+            node for node in self.followers[in_node]
+            if node != 0 and node in self.V
+        )
 
-    # input()
+    def disassembly(self) -> None:
+        """ Разборка графа """
 
-print("Сборка завершена")
-print()
+        while len(self.V) > 2:
+            top_least_node = self.find_top_least()
+            self.visited.appendleft(top_least_node)
 
+            self.V ^= {str(top_least_node + 1)}
+            print(f"Удаляем вершину {top_least_node + 1}")
+            print("V:", sorted(self.V))
 
-# ----
-# ИТОГ
+            related_nodes = list(
+                map(
+                    lambda x: int(x) - 1,
+                    self.find_related_nodes(top_least_node)
+                )
+            )
+            self.s[top_least_node] = related_nodes
 
-def find_lower_path(_from: str, _to: str):
-    start = int(_from) - 1
-    end = int(_to) - 1
-    follower = followers[start][end]
+            pairs = combinations(related_nodes, r=2)
+            for i1, i2 in pairs:
+                distance = self.paths[i1][top_least_node] \
+                           + self.paths[i2][top_least_node]
+                print(f"{i1 + 1} <-> {i2 + 1} = {distance}")
 
-    result = [_from, follower]
-    while follower != _to:
-        new_from = follower
-        start = int(new_from) - 1
-        follower = followers[start][end]
-        result.append(follower)
+                # Если пути не существует
+                # Или старый путь длиннее нового
+                if self.paths[i1][i2] == inf or self.paths[i1][i2] > distance:
+                    print("Заменяем")
+                    self.followers[i1][i2] = str(top_least_node + 1)
+                    self.followers[i2][i1] = str(top_least_node + 1)
 
-    return result
+                    self.paths[i1][i2] = distance
+                    self.paths[i2][i1] = distance
+                else:
+                    print("Ничего не меняем")
 
+            # print_matrix(followers)
+            # print_matrix(paths)
 
-print("Пример: кратчайшие пути от первой вершины до всех остальных")
-v0 = 0
-for i in range(len(paths[v0])):
-    if i == v0:
-        continue
+    def assembly(self) -> None:
+        """ Сборка графа """
 
-    path = paths[v0][i]
+        while self.visited:
+            new_node = self.visited.popleft()
+            print(f"Добавляем вершину: {new_node + 1}")
+            print(f"Смежные с ней: {self.s[new_node]}")
 
-    route = " > ".join(find_lower_path(str(v0 + 1), str(i + 1)))
-    print(f"{v0 + 1} -> {i + 1}: {path:>2} ({route})")
+            # Идем по всем доступным вершинам
+            for node in map(lambda x: int(x) - 1, self.V):
+                old_distance = self.paths[new_node][node]
 
+                print(f"{new_node + 1} <-> {node + 1}: {old_distance}")
 
+                # А вот тут уже идем по смежным
+                min_dist_2 = inf
+                min_node_2 = None
+                for related in self.s[new_node]:
+                    if related == node:
+                        continue
+
+                    distance_2 = \
+                        self.paths[new_node][related] + \
+                        self.paths[related][node]
+                    print(f"({new_node + 1} <-> {related + 1}) + "
+                          f"({related + 1} <-> {node + 1}): {distance_2}")
+
+                    if distance_2 < min_dist_2:
+                        min_dist_2 = distance_2
+                        min_node_2 = related
+
+                if min_dist_2 < old_distance:
+                    print(f"Меняем на {min_dist_2} с вершиной {min_node_2 + 1}")
+                    self.paths[new_node][node] = min_dist_2
+                    self.paths[node][new_node] = min_dist_2
+
+                    self.followers[new_node][node] = str(min_node_2 + 1)
+                    self.followers[node][new_node] = str(min_node_2 + 1)
+
+            print()
+            # print_matrix(followers)
+            # print_matrix(paths)
+
+            self.V.add(str(new_node + 1))
+
+    def get_lower_path(self, _from: str, _to: str) -> List[str]:
+        """ Находит кратчайший путь между вершинами _from и _to """
+
+        start = int(_from) - 1
+        end = int(_to) - 1
+        follower = self.followers[start][end]
+
+        result: List[str] = [_from, follower]
+        while follower != _to:
+            new_from = follower
+            start = int(new_from) - 1
+            follower = self.followers[start][end]
+            result.append(follower)
+
+        return result
+
+    def find_lower_paths(self) -> None:
+        self.disassembly()
+        self.assembly()
+
+    def print_lower_path(self) -> None:
+        print("Пример: кратчайшие пути от первой вершины до всех остальных")
+        v0: int = 0
+        for i in range(len(self.paths[v0])):
+            if i == v0:
+                continue
+
+            path: Union[int, float] = self.paths[v0][i]
+
+            route: str = " > ".join(self.get_lower_path(
+                str(v0 + 1), str(i + 1))
+            )
+            print(f"{v0 + 1} -> {i + 1}: {path:>2} ({route})")
