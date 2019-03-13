@@ -30,6 +30,7 @@ paths = [
     [inf, inf, inf, inf, inf, 0],
 ]
 
+
 # V = {"1", "2", "3", "4"}
 #
 # # Матрица последователей - P
@@ -191,7 +192,10 @@ while visited:
                 min_node_2 = related
 
         if min_dist_2 < old_distance:
-            print(f"Меняем на {min_dist_2} с вершиной \"{min_node_2 + 1}\" ({new_node + 1} -> {node + 1} = {min_dist_2})")
+            print(
+                f"Меняем на {min_dist_2} с вершиной \"{min_node_2 + 1}\" "
+                f"({new_node + 1} -> {node + 1} = {min_dist_2})"
+            )
             paths[new_node][node] = min_dist_2
             followers[new_node][node] = str(min_node_2 + 1)
 
@@ -217,9 +221,13 @@ while visited:
                 min_node_2 = related
 
         if min_dist_2 < old_distance:
-            print(f"Меняем на {min_dist_2} с вершиной \"{min_node_2 + 1}\" ({node + 1} -> {new_node + 1} = {min_dist_2})")
+            print(
+                f"Меняем на {min_dist_2} с вершиной \"{min_node_2 + 1}\" "
+                f"({node + 1} -> {new_node + 1} = {min_dist_2})"
+            )
             paths[node][new_node] = min_dist_2
-            followers[node][new_node] = followers[node][min_node_2]      # str(min_node_2 + 1)
+            followers[node][new_node] = followers[node][
+                min_node_2]  # str(min_node_2 + 1)
 
     print()
     print_matrix(followers)
