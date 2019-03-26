@@ -45,21 +45,41 @@ s = dict()
 #     [inf, 8, 4, 0]
 # ]
 
-V = {"1", "2", "3", "4", "5"}
-followers = [
-    [0, "2", 0, "4", "5"],
-    ["1", 0, "3", 0, 0],
-    [0, "2", 0, "4", "5"],
-    ["1", 0, "3", 0, 0],
-    ["1", 0, "3", 0, 0]
+# V = {"1", "2", "3", "4", "5"}
+# followers = [
+#     [0, "2", 0, "4", "5"],
+#     ["1", 0, "3", 0, 0],
+#     [0, "2", 0, "4", "5"],
+#     ["1", 0, "3", 0, 0],
+#     ["1", 0, "3", 0, 0]
+# ]
+#
+# paths = [
+#     [  0,   3, inf,  10,   2],
+#     [  3,   0,   4, inf, inf],
+#     [inf,   4,   0,   2, 3],
+#     [ 10, inf,   2, 0, inf],
+#     [  2, inf,   3, inf, 0]
+# ]
+# Матрица вершин
+V = {"0", "1", "2", "3", "4"}
+
+# Матрица весов
+paths = [
+    [0, 1, inf, inf, 4],
+    [1, 0, 5, 1, inf],
+    [inf, 5, 0, 2, inf],
+    [inf, 1, 2, 0, 1],
+    [4, inf, inf, 1, 0]
 ]
 
-paths = [
-    [  0,   3, inf,  10,   2],
-    [  3,   0,   4, inf, inf],
-    [inf,   4,   0,   2, 3],
-    [ 10, inf,   2, 0, inf],
-    [  2, inf,   3, inf, 0]
+# Матрица последователей
+followers = [
+    [0, "2", 0, 0, "5"],
+    ["1", 0, "3", "4", 0],
+    [0, "2", 0, "4", 0],
+    [0, "2", "3", 0, "5"],
+    ["1", 0, 0, "4", 0],
 ]
 
 
@@ -129,8 +149,11 @@ while len(V) > 2:
         # Или старый путь длиннее нового
         if paths[i1][i2] == inf or paths[i1][i2] > distance:
             print("Заменяем")
+
             followers[i1][i2] = str(top_least_node + 1)
-            followers[i2][i1] = str(top_least_node + 1)
+            followers[i2][i1] = followers[i2][top_least_node]
+
+            # followers[i2][i1] = str(top_least_node + 1)
 
             paths[i1][i2] = distance
             paths[i2][i1] = distance
@@ -181,7 +204,7 @@ while visited:
             paths[node][new_node] = min_dist_2
 
             followers[new_node][node] = str(min_node_2 + 1)
-            followers[node][new_node] = str(min_node_2 + 1)
+            followers[node][new_node] = followers[node][min_node_2]
 
     print()
     print_matrix(followers)
@@ -201,27 +224,25 @@ print()
 def find_lower_path(_from: str, _to: str):
     start = int(_from) - 1
     end = int(_to) - 1
-    follower = followers[start][end]
+    follower = followers[end][start]
 
-    result = [_from, follower]
-    while follower != _to:
-        new_from = follower
-        start = int(new_from) - 1
-        follower = followers[start][end]
+    result = [_to, ]
+    while follower:
         result.append(follower)
+        new_end = int(follower) - 1
+        follower = followers[new_end][start]
+        # print(new_end)
 
-    return result
+    return result[::-1]
 
 
 print("Пример: кратчайшие пути от первой вершины до всех остальных")
-v0 = 0
+v0 = 1
 for i in range(len(paths[v0])):
     if i == v0:
         continue
 
     path = paths[v0][i]
 
-    route = " > ".join(find_lower_path(str(v0 + 1), str(i + 1)))
+    route = " -> ".join(find_lower_path(str(v0 + 1), str(i + 1)))
     print(f"{v0 + 1} -> {i + 1}: {path:>2} ({route})")
-
-
