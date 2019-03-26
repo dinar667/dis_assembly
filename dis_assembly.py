@@ -94,7 +94,8 @@ class DisAssemblyAlgo:
                 if self.paths[i1][i2] == inf or self.paths[i1][i2] > distance:
                     print("Заменяем")
                     self.followers[i1][i2] = str(top_least_node + 1)
-                    self.followers[i2][i1] = str(top_least_node + 1)
+                    # self.followers[i2][i1] = str(top_least_node + 1)
+                    self.followers[i2][i1] = self.followers[i2][top_least_node]
 
                     self.paths[i1][i2] = distance
                     self.paths[i2][i1] = distance
@@ -141,7 +142,8 @@ class DisAssemblyAlgo:
                     self.paths[node][new_node] = min_dist_2
 
                     self.followers[new_node][node] = str(min_node_2 + 1)
-                    self.followers[node][new_node] = str(min_node_2 + 1)
+                    # self.followers[node][new_node] = str(min_node_2 + 1)
+                    self.followers[node][new_node] = self.followers[node][min_node_2]
 
             print()
             print_matrix(self.followers)
